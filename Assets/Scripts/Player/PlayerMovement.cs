@@ -2,18 +2,19 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-
-    private float dirX;
+    private float dirX, dirY;
+    private const float Speed = 9F, WalkAcceleration = 75F, AirAcceleration = 30F, GroundDeceleration = 75F, JumpForce = 7f;
     private bool isDoubleJump;
     private Rigidbody2D playerRigidBody;
     private Vector2 velocity;
     private Animator anim;
     private SpriteRenderer spriteRenderer;
-    const float jumpForce = 7f;
-    float speed = 9, walkAcceleration = 75, airAcceleration = 30, groundDeceleration = 70;
+
+    private enum MovementState
+    { idle, running, jumping, falling };
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         playerRigidBody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -21,41 +22,29 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    private void FixedUpdate()
     {
+        UpdateAnimationStates();
         dirX = Input.GetAxis("Horizontal");
-        playerRigidBody.velocity = new Vector2(dirX * jumpForce, playerRigidBody.velocity.y);
-
+        playerRigidBody.velocity = new Vector2(dirX * JumpForce, playerRigidBody.velocity.y);
 
         if (Input.GetButtonDown("Jump"))
         {
             PerformJump();
         }
 
-        float acceleration = PlayerCollisions.Instance.IsGrounded(transform.position) ? walkAcceleration : airAcceleration;
-        float deceleration = PlayerCollisions.Instance.IsGrounded(transform.position) ? groundDeceleration : 0;
+        float acceleration = PlayerCollisions.Instance.IsGrounded(transform.position) ? WalkAcceleration : AirAcceleration;
+        float deceleration = PlayerCollisions.Instance.IsGrounded(transform.position) ? GroundDeceleration : 0;
 
         //player is moving
-        if (dirX != 0)
+        if (dirX != 0F)
         {
-            if (dirX < 0)
-            {
-                spriteRenderer.flipX = true;
-            }
-            else
-            {
-                spriteRenderer.flipX = false;
-            }
-            velocity.x = Mathf.MoveTowards(velocity.x, speed * dirX, acceleration * Time.deltaTime);
-            anim.SetBool("isRunning", true);
-
+            velocity.x = Mathf.MoveTowards(velocity.x, Speed * dirX, acceleration * Time.deltaTime);
         }
         else
         {
             velocity.x = Mathf.MoveTowards(velocity.x, 0, deceleration * Time.deltaTime);
-            anim.SetBool("isRunning", false);
         }
-
         velocity.y += Physics2D.gravity.y * Time.deltaTime;
     }
 
@@ -64,12 +53,45 @@ public class PlayerMovement : MonoBehaviour
         if (PlayerCollisions.Instance.IsGrounded(transform.position))
         {
             isDoubleJump = true;
-            playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, jumpForce);
+            playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, JumpForce);
         }
         else if (!PlayerCollisions.Instance.IsGrounded(transform.position) && isDoubleJump)
         {
-            playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, jumpForce);
+            playerRigidBody.velocity = new Vector2(playerRigidBody.velocity.x, JumpForce);
             isDoubleJump = false;
         }
+    }
+
+    private void UpdateAnimationStates()
+    {
+        MovementState animState;
+
+        if (dirX != 0F)
+        {
+            if (dirX < 0F)
+            {
+                spriteRenderer.flipX = true;
+                animState = MovementState.running;
+            }
+            else
+            {
+                spriteRenderer.flipX = false;
+                animState = MovementState.running;
+            }
+        }
+        else
+        {
+            animState = MovementState.idle;
+        }
+
+        if (playerRigidBody.velocity.y > .1F)
+        {
+            animState = MovementState.jumping;
+        }
+        else if (playerRigidBody.velocity.y < -.1F)
+        {
+            animState = MovementState.falling;
+        }
+        anim.SetInteger("playerStateIndex", (int)animState);
     }
 }
