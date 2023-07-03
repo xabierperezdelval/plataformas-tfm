@@ -7,17 +7,16 @@ using UnityEngine;
 [InitializeOnLoad]
 public class ReadmeEditorBE2 : Editor
 {
+    private static string kShowedReadmeSessionStateName = "ReadmeEditor.showedReadme";
 
-    static string kShowedReadmeSessionStateName = "ReadmeEditor.showedReadme";
-
-    static float kSpace = 16f;
+    private static float kSpace = 16f;
 
     static ReadmeEditorBE2()
     {
         EditorApplication.delayCall += SelectReadmeAutomatically;
     }
 
-    static void SelectReadmeAutomatically()
+    private static void SelectReadmeAutomatically()
     {
         if (!SessionState.GetBool(kShowedReadmeSessionStateName, false))
         {
@@ -32,7 +31,7 @@ public class ReadmeEditorBE2 : Editor
         }
     }
 
-    static void LoadLayout()
+    private static void LoadLayout()
     {
         var assembly = typeof(EditorApplication).Assembly;
         var windowLayoutType = assembly.GetType("UnityEditor.WindowLayout", true);
@@ -40,7 +39,7 @@ public class ReadmeEditorBE2 : Editor
         method.Invoke(null, new object[] { Path.Combine(Application.dataPath, "TutorialInfo/Layout.wlt"), false });
     }
 
-    static ReadmeBE2 SelectReadme()
+    private static ReadmeBE2 SelectReadme()
     {
         var ids = AssetDatabase.FindAssets("Readme t:ReadmeBE2");
         if (ids.Length == 1)
@@ -99,22 +98,25 @@ public class ReadmeEditorBE2 : Editor
         }
     }
 
+    private bool m_Initialized;
 
-    bool m_Initialized;
+    private GUIStyle LinkStyle
+    { get { return m_LinkStyle; } }
+    [SerializeField] private GUIStyle m_LinkStyle;
 
-    GUIStyle LinkStyle { get { return m_LinkStyle; } }
-    [SerializeField] GUIStyle m_LinkStyle;
+    private GUIStyle TitleStyle
+    { get { return m_TitleStyle; } }
+    [SerializeField] private GUIStyle m_TitleStyle;
 
-    GUIStyle TitleStyle { get { return m_TitleStyle; } }
-    [SerializeField] GUIStyle m_TitleStyle;
+    private GUIStyle HeadingStyle
+    { get { return m_HeadingStyle; } }
+    [SerializeField] private GUIStyle m_HeadingStyle;
 
-    GUIStyle HeadingStyle { get { return m_HeadingStyle; } }
-    [SerializeField] GUIStyle m_HeadingStyle;
+    private GUIStyle BodyStyle
+    { get { return m_BodyStyle; } }
+    [SerializeField] private GUIStyle m_BodyStyle;
 
-    GUIStyle BodyStyle { get { return m_BodyStyle; } }
-    [SerializeField] GUIStyle m_BodyStyle;
-
-    void Init()
+    private void Init()
     {
         if (m_Initialized)
             return;
@@ -137,7 +139,7 @@ public class ReadmeEditorBE2 : Editor
         m_Initialized = true;
     }
 
-    bool LinkLabel(GUIContent label, params GUILayoutOption[] options)
+    private bool LinkLabel(GUIContent label, params GUILayoutOption[] options)
     {
         var position = GUILayoutUtility.GetRect(label, LinkStyle, options);
 
@@ -152,4 +154,3 @@ public class ReadmeEditorBE2 : Editor
         return GUI.Button(position, label, LinkStyle);
     }
 }
-

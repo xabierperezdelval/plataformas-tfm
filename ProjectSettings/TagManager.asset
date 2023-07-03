@@ -5,16 +5,30 @@ TagManager:
   serializedVersion: 2
   tags:
   - PlayerShot
+  - Obstacle
+  - StompableEnemy
+  - NonStompableEnemy
+  - DamageZone
+  - Terrain
+  - Goal
+  - PlatinumCoin
+  - GoldCoin
+  - ShieldPickup
+  - Shield
+  - SmallFruit
+  - LargeFruit
+  - MonsterWall
+  - AudioAreaTrigger
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Enemy
   - Water
   - UI
   - Ground
-  - 
-  - 
+  - Shield
+  - PlayerShot
   - 
   - 
   - 
